@@ -6,7 +6,7 @@ from datetime import datetime
 fake = Faker(['fr_FR'])
 
 # --- CONFIGURATION ---
-NB_TENRACS = 100_000 # Ajustez pour atteindre le million total cumulé
+NB_TENRACS = 10 # Ajustez pour atteindre le million total cumulé
 NB_REPAS = 10
 NB_MACHINES = 10
 
@@ -93,23 +93,16 @@ def generate_data():
     # --- INSERTION OU EXPORT ---
     # Ici vous pouvez utiliser cursor.executemany() pour insérer dans votre DB
     # Ou écrire dans un fichier .sql
-    insert_tenrac(tenracs)
-
-def write_to_csv(data, filename):
-    import csv
-    with open("data/" + filename, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        writer.writerows(data)
-    print(f"Fichier {filename} généré.")
-
-def insert_tenrac(data):
     with oracledb.connect(user="SYSTEM", password="02022007", host="127.0.0.1") as connection:
-        for tenrac in data:
-            with connection.cursor() as cursor:
-                cursor.execute("insert into TENRAC values (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12)", 
-                            (tenrac[0], tenrac[1], tenrac[2], tenrac[3], tenrac[4], tenrac[5], None, None, None,
-                            None, None, None))
-        connection.commit()
+        insert_tenrac(tenracs, connection)
+
+def insert_tenrac(data, connection):
+    for tenrac in data:
+        with connection.cursor() as cursor:
+            cursor.execute("insert into TENRAC values (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12)", 
+                        (tenrac[0], tenrac[1], tenrac[2], tenrac[3], tenrac[4], tenrac[5], None, None, None,
+                        None, None, None))
+    connection.commit()
     print("Finished Tenrac")
 
 if __name__ == "__main__":
