@@ -66,7 +66,8 @@ def generate_data():
             random.choice(rangs)[0] if random.random() > 0.5 else None,
             grade,
             random.choice(titres)[0] if random.random() > 0.7 else None,
-            organismes[0], None
+            random.choice([element[0] for element in organismes]) if random.random() > 0.3 else None,
+            random.choice([element[0] for element in organisations]) if random.random() > 0.8 else None
         ))
         
         if grade in ['Chevalier', 'Grand Chevalier']:
