@@ -1,3 +1,3 @@
-insert into Modele values ('Traditionnel', 'Moderne')
-insert into Modele values ('Combine 5-en-1', 'Contemporain')
-insert into Modele values ('Bas de gamme', 'Vintage')
+insert into Modele values ('Traditionnel', 'Mensuel')
+insert into Modele values ('Combiné 5-en-1', 'Annuel')
+insert into Modele values ('Bas de gamme', 'Journalier')
