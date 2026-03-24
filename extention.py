@@ -5,7 +5,7 @@ from datetime import datetime
 
 fake = Faker(['fr_FR'])
 
-HOST = "147.94.228.190"
+HOST = "127.0.0.1"
 PASSWORD = "02022007"
 
 # --- CONFIGURATION ---
