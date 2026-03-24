@@ -2,6 +2,8 @@ import oracledb # Ou votre connecteur Oracle/PostgreSQL
 import random
 from faker import Faker
 from datetime import datetime
+import csv
+from time import time
 
 fake = Faker(['fr_FR'])
 
@@ -13,20 +15,18 @@ NB_TENRACS = 10_000 # Ajustez pour atteindre le million total cumulé
 NB_REPAS = 10
 NB_MACHINES = 10
 
-def generate_data():
+def generate_data() -> tuple:
     # Listes de constantes pour la cohérence métier
     grades = [
-        ('Affilié', 1), ('Sympathisant', 2), ('Adhérent', 3), 
-        ('Chevalier', 4), ('Grand Chevalier', 5), ('Commandeur', 6), ('Grand\'Croix', 7)
+        ('Affilie', 1), ('Sympathisant', 2), ('Adhérent', 3), 
+        ('Chevalier', 4), ('Grand Chevalier', 5), ('Commandeur', 6), ('Grand croix', 7)
     ]
     rangs = [('Novice', 1), ('Compagnon', 2)]
     titres = [('Philanthrope', 1), ('Protecteur', 2), ('Honorable', 3)]
     dignites = [('Maître', 1), ('Grand Chancelier', 2), ('Grand Maître', 3)]
     
-    modeles = [('Traditionnel', 'Moderne'), ('Combiné 5-en-1', 'Contemporain'), ('Bas de gamme', 'Vintage')]
+    modeles = [('Traditionnel', 'Moderne'), ('Combine 5-en-1', 'Contemporain'), ('Bas de gamme', 'Vintage')]
     types_entretien = [('Nettoyage Résistance', '6'), ('Vérification Électrique', '12'), ('Décapage', '3')]
-
-    print("Début de la génération...")
 
     # 1. Tables de Référence (Petites)
     # On génère ici les Grades, Rangs, etc.
@@ -38,7 +38,7 @@ def generate_data():
 
     # 3. Organisations (Ordre et Clubs)
     # idO 1 est l'Ordre, les autres sont des Clubs
-    organisations = [(1, "L'Ordre Suprême du Tenrac", "Ordre", random.randint(1, 100))]
+    organisations = [(1, "L Ordre Suprême du Tenrac", "Ordre", random.randint(1, 100))]
     for i in range(2, 201):
         organisations.append((i, f"Club Tenrac {fake.city()}", "Club", random.randint(1, 100)))
 
@@ -98,38 +98,10 @@ def generate_data():
         ))
 
     print(f"Génération terminée : {NB_TENRACS} Tenracs créés.")
-    
-    drop_tables()
 
-    with oracledb.connect(user="SYSTEM", password=PASSWORD, host=HOST) as connection:
-        insert(territoires, connection, "Territoire", "insert into Territoire values (:1, :2)")
-        insert(organismes, connection, "Organisme Associe", "insert into Organisme_associe values (:1, :2)")
-        insert(adresses, connection, "Adresse", "insert into Adresse values (:1, :2)")
-        insert(organisations, connection, "Organisation", "insert into Organisation values (:1, :2, :3, :4)")
-        insert(dignites, connection, "Dignite", "insert into Dignite values (:1, :2)")
-        insert(rangs, connection, "Rang", "insert into Rang values (:1, :2)")
-        insert(grades, connection, "Grade", "insert into Grade values (:1, :2)")
-        insert(titres, connection, "Titre", "insert into Titre values (:1, :2)")
-        insert(tenracs, connection, "Tenracs", "insert into Tenrac values (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12)")
-        insert(repas, connection, "Repas", "insert into Repas values (:1, :2, :3, :4)")
-        insert(machines, connection, "Machine", "insert into Machine values (:1, :2)")
-        insert(historique_entretiens, connection, "Historique Entretien", "insert into Historique_Entretien values (:1, :2, :3, :4)")
-        insert(modeles, connection, "Modele", "insert into Modele values (:1, :2)")
-        insert(ordres, connection, "Ordre des Tenracs", "insert into Ordre_des_tenracs values (:1)")
-        #insert(ingredients, connection, "Ingredient", "insert into Ingredient values (:1, :2)")
-        #insert(sauces, connection, "Sauce", "insert into Sauce values (:1, :2)")
-        #insert(plats, connection, "Plat", "insert into Plat values (:1, :2, :3)")
-        #insert(est_associe, connection, "Est_Associe", "insert into Est_Associe values (:1, :2)")
-        #insert(utilise, connection, "Utilise", "insert into Utilise values (:1, :2)")
-        #insert(associe, connection, "Associe", "insert into Associe values (:1, :2)")
-        #insert(est_createur, connection, "Est_Createur", "insert into Est_Createur values (:1, :2)")
-        #insert(participe, connection, "Participe", "insert into Participe values (:1, :2)")
-        #insert(combineis, connection, "CombineIS", "insert into CombineIS values (:1, :2)")
-        #insert(combinesp, connection, "CombineSP", "insert into CombineSP values (:1, :2)")
-        #insert(combineip, connection, "CombineIP", "insert into CombineIP values (:1, :2)")
-        #insert(adresse_partenaire, connection, "Adresse_Partenaire", "insert into Adresse_Partenaire values (:1, :2)")
+    return (territoires, organismes, adresses, organisations, dignites, rangs, grades, titres, tenracs, repas, machines, historique_entretiens, modeles, ordres)
 
-        connection.commit()
+
 
 def drop_tables():
     intention = open("intention.sql", "r")
@@ -170,13 +142,82 @@ def drop_tables():
                 cursor.execute("drop table ADRESSE_PARTENAIRE cascade constraints")
                 for table in intentionSQL[0:len(intentionSQL)-1]:
                     cursor.execute(table)
-        print("Drop all tables succeed")
 
-def insert(data, connection, table, sql):
-    with connection.cursor() as cursor:
-        cursor.executemany(sql, 
-                    data)
-    print("Finished " + table)
+def insert(insert, data):
+        insert(data[0], "Territoire", "insert into Territoire values (:1, :2)")
+        insert(data[1], "Organisme Associe", "insert into Organisme_associe values (:1, :2)")
+        insert(data[2], "Adresse", "insert into Adresse values (:1, :2)")
+        insert(data[3], "Organisation", "insert into Organisation values (:1, :2, :3, :4)")
+        insert(data[4], "Dignite", "insert into Dignite values (:1, :2)")
+        insert(data[5], "Rang", "insert into Rang values (:1, :2)")
+        insert(data[6], "Grade", "insert into Grade values (:1, :2)")
+        insert(data[7], "Titre", "insert into Titre values (:1, :2)")
+        insert(data[8], "Tenracs", "insert into Tenrac values (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12)")
+        insert(data[9], "Repas", "insert into Repas values (:1, :2, :3, :4)")
+        insert(data[10], "Machine", "insert into Machine values (:1, :2)")
+        insert(data[11], "Historique Entretien", "insert into Historique_Entretien values (:1, :2, :3, :4)")
+        insert(data[12], "Modele", "insert into Modele values (:1, :2)")
+        insert(data[13], "Ordre des Tenracs", "insert into Ordre_des_tenracs values (:1)")
+        #insert(ingredients, connection, "Ingredient", "insert into Ingredient values (:1, :2)")
+        #insert(sauces, connection, "Sauce", "insert into Sauce values (:1, :2)")
+        #insert(plats, connection, "Plat", "insert into Plat values (:1, :2, :3)")
+        #insert(est_associe, connection, "Est_Associe", "insert into Est_Associe values (:1, :2)")
+        #insert(utilise, connection, "Utilise", "insert into Utilise values (:1, :2)")
+        #insert(associe, connection, "Associe", "insert into Associe values (:1, :2)")
+        #insert(est_createur, connection, "Est_Createur", "insert into Est_Createur values (:1, :2)")
+        #insert(participe, connection, "Participe", "insert into Participe values (:1, :2)")
+        #insert(combineis, connection, "CombineIS", "insert into CombineIS values (:1, :2)")
+        #insert(combinesp, connection, "CombineSP", "insert into CombineSP values (:1, :2)")
+        #insert(combineip, connection, "CombineIP", "insert into CombineIP values (:1, :2)")
+        #insert(adresse_partenaire, connection, "Adresse_Partenaire", "insert into Adresse_Partenaire values (:1, :2)")
+
+
+def insert_oracle(data, table, sql):
+    with oracledb.connect(user="SYSTEM", password=PASSWORD, host=HOST) as connection:
+        with connection.cursor() as cursor:
+            cursor.executemany(sql, 
+                        data)
+        connection.commit()
+        print("Finished " + table)
+
+def insert_csv(data, table, sql):
+    with open("csv/"+table+".csv", "w") as file:
+        wr = csv.writer(file, quoting=csv.QUOTE_NONNUMERIC)
+        wr.writerows(data)
+    print("Finished", table)
+
+def insert_sql(data, table, sql):
+    insert = sql.split('(')[0]
+    result = ""
+    for element in data:
+        result+=insert + '('
+        for i in range(len(element)):
+            if isinstance(element[i], str) or isinstance(element[i], datetime):
+                result += "'"+ element[i].__str__() + "'"
+            else:
+                result += str(element[i])
+            if i != len(element)-1:
+                result+=", "
+        result+=')\n'
+    with open("data/" +table + ".sql", "w") as file:
+        file.write(result)
+    print("Finished", table)
 
 if __name__ == "__main__":
-    generate_data()
+    NB_TENRACS = eval(input("Nombre tenrac: "))
+    a = time()
+    print("--- DROP ALL TABLES AND RECREATE DATABASE ---")
+    drop_tables()
+    print("--- GENERATION DATA STARTED ---")
+    data = generate_data()
+    print("--- GENERATION DATA FINISHED ---")
+    print("--- GENERATION ORACLE STARTED ---")
+    insert(insert_oracle, data)
+    print("--- GENERATION ORACLE FINISHED ---")
+    print("--- GENERATION SQL STARTED ---")
+    insert(insert_sql, data)
+    print("--- GENERATION SQL FINISHED ---")
+    print("--- GENERATION CSV STARTED ---")
+    insert(insert_csv, data)
+    print("--- GENERATION FINISHED ---")
+    print("Generation took", round(time()-a), "seconds")
