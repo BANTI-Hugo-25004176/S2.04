@@ -1,6 +1,6 @@
 LoopingImage.jpg
 .venv
 py*
-data/
+sql/
 csv/
 .DS_Store
