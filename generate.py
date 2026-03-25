@@ -32,7 +32,6 @@ def generate_data() -> tuple:
     types_entretien = [('Nettoyage Résistance', '6'), ('Vérification Électrique', '12'), ('Décapage', '3')]
 
     entretiens = [(i, type_entretien[0], type_entretien[1]) for i, type_entretien in enumerate(types_entretien, start=1)]
-    print("Début de la génération...")
 
     # 1. Tables de Référence (Petites)
     # On génère ici les Grades, Rangs, etc.
@@ -119,7 +118,6 @@ def generate_data() -> tuple:
     utilise = [(idr[0], idm[0]) for idr in repas for idm in machines]
 
     associe = [(nom_mod[0], iden[0]) for nom_mod in modeles for iden in entretiens]
-    print(f"Génération terminée : {NB_TENRACS} Tenracs créés.")
 
         # 7 generation plats, sauces, ingredients, et leurs associations
     unique_plat = set()
@@ -282,6 +280,7 @@ def insert_sql(data, table, sql):
 if __name__ == "__main__":
     NB_TENRACS = eval(input("Number of tenrac: "))
     a = time()
+    print("--- GENERATION DATA STARTED ---")
     data = generate_data()
     print("--- GENERATION DATA FINISHED IN", round(time() - a),"SECONDS ---")
     oracle = str(input("Do you have a oracle db ? (y/N) ")).lower()
@@ -294,7 +293,6 @@ if __name__ == "__main__":
         print("--- DROP ALL TABLES AND RECREATE DATABASE ---")
         drop_tables()
         print("--- DROP ALL TABLES AND RECREATE DATABASE FINISHED IN", round(time() - b) ,"SECONDS ")
-        print("--- GENERATION DATA STARTED ---")
         print("--- GENERATION ORACLE STARTED ---")
         b = time()
         insert(insert_oracle, data)
